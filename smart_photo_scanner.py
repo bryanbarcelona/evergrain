@@ -4,18 +4,18 @@ from collections import Counter
 from PIL import Image as imgr
 from autocrop.autocrop import MultiPartImage, Background
 import glob
-from exif import Image #pip install exif
+#from exif import Image #pip install exif
 from string import ascii_uppercase
 import os
 from os import path
 from PIL import Image
 import re
-import exiftool #pip install and add exiftool(-k).exe to site package and link in (exiftool.py class) - actually right here in the with statement opening exiftool
+#import exiftool #pip install and add exiftool(-k).exe to site package and link in (exiftool.py class) - actually right here in the with statement opening exiftool
 #from libxmp import XMPFiles, consts
 import sys
 import datetime
 import glob
-import pandas as pd
+#import pandas as pd
 
 
 #log_file = open('D:\Projekte\Coding\\test_log.log', 'a')
@@ -265,7 +265,7 @@ scanned_raw_image_list.sort()
 print(f"There are {len(scanned_raw_image_list)} scanned items.")
 #print(scanned_raw_image_list)
 # A saved scan with the scanner empty.
-blank_img = imgr.open('D:\\Projekte\\Coding\\Photo crop and smart renamer\\background_reference.jpg')
+blank_img = imgr.open(r"D:\Coding\evergrain\configs\background_reference.jpg")
 background = Background().load_from_image(blank_img, dpi=600)
 
 for i in range(len(scanned_raw_image_list)):   # cutting out multiple images from one scan
@@ -275,21 +275,23 @@ for i in range(len(scanned_raw_image_list)):   # cutting out multiple images fro
     scan = MultiPartImage(scan_img, background, dpi=600)
 
     for index, photo in enumerate(scan):
-        photo.save(f"C:\\Users\\Bryan Barcelona\\Desktop\\Bryan\\2022 Scan Project\\temp\\{str(i).zfill(3)}image-{index}.jpg", dpi=(600, 600), quality=90)
+        photo.save(f"C:\\Users\\bryan\\Desktop\\output\\{str(i).zfill(3)}image-{index}.jpg", dpi=(600, 600), quality=90)
 
-cut_image_list = glob.glob('C:\\Users\\Bryan Barcelona\\Desktop\\Bryan\\2022 Scan Project\\temp\\*image-*.jpg')
+cut_image_list = glob.glob('C:\\Users\\bryan\\Desktop\\output\\*image-*.jpg')
 print(f"There are {len(cut_image_list)} cut out items.")
 #print(cut_image_list)
-for i in range(len(cut_image_list)):  # cropping the edges
-    with imgr.open(cut_image_list[i]) as im:
+# for i in range(len(cut_image_list)):  # cropping the edges
+#     with imgr.open(cut_image_list[i]) as im:
 
-        width, height = im.size
-        (left, upper, right, lower) = (15, 15, width - 15, height - 15)
+#         width, height = im.size
+#         (left, upper, right, lower) = (15, 15, width - 15, height - 15)
 
-        im_crop = im.crop((left, upper, right, lower))
-        #im_crop.save(f"D:\\Test Folder\\Dont\\{str(i).zfill(3)}image-{index}.jpg", dpi=(600, 600), quality=90)
-        im_crop.save(cut_image_list[i], dpi=(600, 600), quality=91)
-cut_image_list.sort()
+#         im_crop = im.crop((left, upper, right, lower))
+#         #im_crop.save(f"D:\\Test Folder\\Dont\\{str(i).zfill(3)}image-{index}.jpg", dpi=(600, 600), quality=90)
+#         im_crop.save(cut_image_list[i], dpi=(600, 600), quality=91)
+# cut_image_list.sort()
+
+"""
 '''**********************************************************************************************************************************
 ++++++USER INPUT
 
@@ -498,3 +500,4 @@ newpath = f"C:\\Users\\Bryan Barcelona\\Desktop\\Bryan\\2022 Scan Project\\{curr
 
 if os.path.exists(oldpath):
     os.rename(oldpath, newpath)
+"""
