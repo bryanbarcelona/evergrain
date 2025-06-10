@@ -35,7 +35,7 @@ def correct_image_orientation(image_path: str, save_path: Optional[str] = None) 
     rotated = img.rotate(-angle, expand=True)
 
     output_path = save_path or image_path
-    rotated.save(output_path)
+    rotated.save(output_path, quality=100)
 
 
 def visualize_detections(image_path: str, mode: str = "face", conf_threshold: float = 0.7) -> None:

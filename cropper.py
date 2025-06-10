@@ -1,6 +1,6 @@
 '''
 Module: cropper.py
-Author: [Your Name or Org]
+Author: Bryan Barcelona
 Description:
     Provides high-precision background detection and photo segmentation
     from scanned images. The public API consists of:
