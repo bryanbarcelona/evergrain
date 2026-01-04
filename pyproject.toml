@@ -27,6 +27,11 @@ combine-as-imports = true
 force-wrap-aliases = true
 
 
+[tool.commitizen]
+version_provider = "uv"
+tag_format = "v${version}"
+
+
 [[tool.uv.index]]
 name = "pypi"
 url = "https://pypi.org/simple/"
