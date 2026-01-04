@@ -1,5 +1,5 @@
 # Ignore virtual environment
-evergrainvenv/
+.venv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -19,6 +19,18 @@ dist/
 
 # MacOS files
 .DS_Store
+
+# Legacy folder
+legacy/
+
+# image files
+/images/*.png
+/images/*.psd
+!images/evergrain_logo.png
+
+# Locals only
+tester.py
+notes.txt
 
 # dotenv
 .env

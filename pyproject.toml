@@ -9,3 +9,19 @@ dependencies = [
     "opencv-python>=4.11.0.86",
     "pillow>=12.0.0",
 ]
+
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+
+[tool.ruff]
+preview = true
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint.isort]
+known-first-party = ["evergrain"]
+combine-as-imports = true
+force-wrap-aliases = true

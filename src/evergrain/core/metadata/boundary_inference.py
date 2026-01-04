@@ -1,17 +1,10 @@
-import re
-
 from collections import defaultdict
-
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import List, Optional, Tuple
 
 from evergrain.core.models.metadata import MetadataRow
 from evergrain.utils.validators import _is_valid_date
 
-# ----------------------------
-# Constants
-# ----------------------------
 
 _TIGHT_CLUSTER_SPREAD = timedelta(seconds=30)
 _LOOSE_CLUSTER_SPREAD = timedelta(minutes=4)
@@ -73,9 +66,7 @@ def _get_row_time_bounds(
     if row.hour is not None:
         if row.minute is not None:
             if row.second is not None:
-                dt = datetime(
-                    row.year, row.month, row.day, row.hour, row.minute, row.second
-                )
+                dt = datetime(row.year, row.month, row.day, row.hour, row.minute, row.second)
                 return dt, dt
             else:
                 start = datetime(row.year, row.month, row.day, row.hour, row.minute, 0)
@@ -230,6 +221,7 @@ def _get_cluster_bounds(
             cluster_start = center - spread / 2
             cluster_end = center + spread / 2
             return cluster_start, cluster_end
+
     else:
         if cluster_name and "tight" in cluster_name.lower():
             default_spread = _TIGHT_CLUSTER_SPREAD
@@ -297,9 +289,7 @@ def _distribute_clusters_in_scene(
 
     for group_start, group_end, clusters in unanchored_groups:
         available_duration = group_end - group_start
-        total_spread = sum(
-            (spread for _, _, spread in clusters), timedelta()
-        )  # ✅ FIXED HERE
+        total_spread = sum((spread for _, _, spread in clusters), timedelta())  # ✅ FIXED HERE
         num_clusters = len(clusters)
         if available_duration >= total_spread and num_clusters > 0:
             gap = (available_duration - total_spread) / (num_clusters + 1)
@@ -308,9 +298,7 @@ def _distribute_clusters_in_scene(
                 result[name] = (current_time, current_time + spread)
                 current_time += spread + gap
         else:
-            fraction = (
-                available_duration / total_spread if total_spread > timedelta() else 1
-            )
+            fraction = available_duration / total_spread if total_spread > timedelta() else 1
             current_time = group_start
             for name, rows, spread in clusters:
                 actual_spread = spread * fraction
@@ -332,16 +320,12 @@ def _distribute_clusters_with_constraints(
 
     for name, rows, has_anchors, spread, status in sorted_clusters:
         if status is None or status in ["no_date", "invalid"]:
-            scene_distributed.append(
-                (name, rows, has_anchors if status is None else False, spread)
-            )
+            scene_distributed.append((name, rows, has_anchors if status is None else False, spread))
         elif status != "cluster_partial_time":
             constrained_singletons.append((name, rows, status))
 
     if scene_distributed:
-        scene_results = _distribute_clusters_in_scene(
-            scene_distributed, scene_start, scene_end
-        )
+        scene_results = _distribute_clusters_in_scene(scene_distributed, scene_start, scene_end)
         result.update(scene_results)
 
     for name, rows, has_anchors, spread, status in sorted_clusters:
@@ -393,9 +377,7 @@ def _distribute_clusters_with_constraints(
                 available_start = max(start, scene_start)
                 available_end = min(end, scene_end)
             else:
-                available_start, available_end = (
-                    (start, end) if start and end else (scene_start, scene_end)
-                )
+                available_start, available_end = (start, end) if start and end else (scene_start, scene_end)
         else:
             available_start, available_end = scene_start, scene_end
 
@@ -413,6 +395,46 @@ def _distribute_clusters_with_constraints(
     return result
 
 
+def _enforce_min_cluster_spread(rows: List[MetadataRow]) -> None:
+    """Expand cluster bounds ONLY if current span is too small for unique assignment."""
+    groups = defaultdict(list)
+    for row in rows:
+        if row.unique_group_id is not None:
+            groups[row.unique_group_id].append(row)
+
+    for _, group in groups.items():
+        n = len(group)
+        if n <= 1:
+            continue
+
+        starts = [r.lower_bound for r in group if r.lower_bound is not None]
+        ends = [r.upper_bound for r in group if r.upper_bound is not None]
+        if not starts or not ends:
+            continue
+
+        start = min(starts)
+        end = max(ends)
+        current_span = end - start
+
+        cluster_name = group[0].Cluster or ""
+        if "tight" in cluster_name.lower():
+            required_span = timedelta(seconds=5 * n)
+        else:
+            required_span = timedelta(seconds=60 * n)
+
+        if current_span >= required_span:
+            continue
+
+        center = start + current_span / 2
+        half = required_span / 2
+        new_start = center - half
+        new_end = center + half
+
+        for row in group:
+            row.lower_bound = new_start
+            row.upper_bound = new_end
+
+
 def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
     """Compute temporal inference bounds for each row."""
     events = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
@@ -424,10 +446,7 @@ def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
 
     for event_name, scenes in events.items():
         event_rows = [
-            r
-            for scene_clusters in scenes.values()
-            for cluster_rows in scene_clusters.values()
-            for r in cluster_rows
+            r for scene_clusters in scenes.values() for cluster_rows in scene_clusters.values() for r in cluster_rows
         ]
         event_start, event_end = _get_event_bounds(event_rows)
         scene_bounds_data = []
@@ -435,23 +454,15 @@ def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
             if scene_name == "__NO_SCENE__":
                 continue
             scene_rows = [r for cluster_rows in clusters.values() for r in cluster_rows]
-            scene_start, scene_end = _get_scene_bounds(
-                scene_rows, event_start, event_end
-            )
+            scene_start, scene_end = _get_scene_bounds(scene_rows, event_start, event_end)
             min_row = min(r.row_num for r in scene_rows)
             max_row = max(r.row_num for r in scene_rows)
-            scene_bounds_data.append(
-                (scene_name, scene_start, scene_end, min_row, max_row)
-            )
+            scene_bounds_data.append((scene_name, scene_start, scene_end, min_row, max_row))
 
         for scene_name, clusters in scenes.items():
             scene_rows = [r for cluster_rows in clusters.values() for r in cluster_rows]
             if scene_name == "__NO_SCENE__":
-                scene_rows_nums = [
-                    r.row_num
-                    for cluster_rows in clusters.values()
-                    for r in cluster_rows
-                ]
+                scene_rows_nums = [r.row_num for cluster_rows in clusters.values() for r in cluster_rows]
                 min_row = min(scene_rows_nums)
                 max_row = max(scene_rows_nums)
                 before = [s for s in scene_bounds_data if s[4] < min_row]
@@ -465,9 +476,7 @@ def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
                 else:
                     scene_start, scene_end = event_start, event_end
             else:
-                scene_start, scene_end = _get_scene_bounds(
-                    scene_rows, event_start, event_end
-                )
+                scene_start, scene_end = _get_scene_bounds(scene_rows, event_start, event_end)
 
             distributable_clusters = []
             for cluster_name, cluster_rows in clusters.items():
@@ -482,41 +491,26 @@ def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
                         "year_only",
                     ]:
                         spread = _TIGHT_CLUSTER_SPREAD
-                        distributable_clusters.append(
-                            (cluster_name, cluster_rows, False, spread, status)
-                        )
+                        distributable_clusters.append((cluster_name, cluster_rows, False, spread, status))
                 else:
-                    spread = (
-                        _TIGHT_CLUSTER_SPREAD
-                        if "tight" in cluster_name.lower()
-                        else _LOOSE_CLUSTER_SPREAD
-                    )
-                    has_specific_time = any(
-                        _classify_row(r) in ["strong_anchor", "partial_time"]
-                        for r in cluster_rows
-                    )
-                    distributable_clusters.append(
-                        (
-                            cluster_name,
-                            cluster_rows,
-                            False,
-                            spread,
-                            "cluster_partial_time" if has_specific_time else None,
-                        )
-                    )
+                    spread = _TIGHT_CLUSTER_SPREAD if "tight" in cluster_name.lower() else _LOOSE_CLUSTER_SPREAD
+                    has_specific_time = any(_classify_row(r) in ["strong_anchor", "partial_time"] for r in cluster_rows)
+                    distributable_clusters.append((
+                        cluster_name,
+                        cluster_rows,
+                        False,
+                        spread,
+                        "cluster_partial_time" if has_specific_time else None,
+                    ))
 
-            distributed_bounds = _distribute_clusters_with_constraints(
-                distributable_clusters, scene_start, scene_end
-            )
+            distributed_bounds = _distribute_clusters_with_constraints(distributable_clusters, scene_start, scene_end)
 
             for cluster_name, cluster_rows in clusters.items():
                 is_singleton = cluster_name.startswith("__SINGLETON_")
                 if cluster_name in distributed_bounds:
                     cluster_start, cluster_end = distributed_bounds[cluster_name]
                 else:
-                    cluster_start, cluster_end = _get_cluster_bounds(
-                        cluster_rows, scene_start, scene_end
-                    )
+                    cluster_start, cluster_end = _get_cluster_bounds(cluster_rows, scene_start, scene_end)
 
                 if not is_singleton:
                     for row in cluster_rows:
@@ -546,12 +540,8 @@ def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
                                     cluster_end,
                                 )
                             else:
-                                day_start = datetime(
-                                    row.year, row.month, row.day, 0, 0, 0
-                                )
-                                day_end = datetime(
-                                    row.year, row.month, row.day, 23, 59, 59
-                                )
+                                day_start = datetime(row.year, row.month, row.day, 0, 0, 0)
+                                day_end = datetime(row.year, row.month, row.day, 23, 59, 59)
                                 row.lower_bound = max(day_start, scene_start)
                                 row.upper_bound = min(day_end, scene_end)
                         elif status in ("year_month", "year_only"):
@@ -561,9 +551,7 @@ def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
                                     cluster_end,
                                 )
                             else:
-                                partial_start, partial_end = _get_partial_date_bounds(
-                                    row
-                                )
+                                partial_start, partial_end = _get_partial_date_bounds(row)
                                 if partial_start and partial_end:
                                     row.lower_bound = max(partial_start, scene_start)
                                     row.upper_bound = min(partial_end, scene_end)
@@ -574,61 +562,6 @@ def _compute_bounds_for_all_rows(rows: List[MetadataRow]) -> List[MetadataRow]:
                                 cluster_start,
                                 cluster_end,
                             )
+
+    _enforce_min_cluster_spread(rows)
     return rows
-
-
-# ----------------------------
-# Public API
-# ----------------------------
-
-
-# def process_metadata_csv(csv_path: Path) -> List[MetadataRow]:
-#     """
-#     Process a metadata CSV file and infer temporal bounds for each row.
-
-#     This function orchestrates the full pipeline:
-#     - Loads the CSV
-#     - Normalizes 2-digit years
-#     - Resolves and assigns cluster names
-#     - Computes lower/upper temporal bounds for every row
-
-#     Args:
-#         csv_path (Path): Path to the input CSV file.
-
-#     Returns:
-#         List[MetadataRow]: List of processed rows with populated `lower_bound`
-#         and `upper_bound` fields.
-
-#     Raises:
-#         FileNotFoundError: If the CSV file does not exist.
-#         ValueError: If cluster names are malformed.
-
-#     Example:
-#         >>> from pathlib import Path
-#         >>> rows = process_metadata_csv(Path("metadata.csv"))
-#         >>> print(rows[0].lower_bound, rows[0].upper_bound)
-#         2023-05-15 14:30:00 2023-05-15 14:30:59
-#     """
-#     rows = _load_metadata_csv(csv_path)
-#     rows = _normalize_years(rows)
-#     rows = _resolve_cluster_names(rows)
-#     rows = _assign_undeclared_clusters(rows)
-#     return _compute_bounds_for_all_rows(rows)
-
-
-# ----------------------------
-# Main (for testing only)
-# ----------------------------
-
-# if __name__ == "__main__":
-#     test_csv_path = Path(r"C:\Users\bryan\Desktop\temp\test_metadata - Copy (2).csv")
-#     final_rows = process_metadata_csv(test_csv_path)
-#     for r in final_rows:
-#         tag = ""
-#         if r.lower_bound is None or r.upper_bound is None:
-#             tag = " [INVALID]"
-#         elif r.lower_bound > r.upper_bound:
-#             tag = " [INVERTED]"
-#         print(
-#             f"Row {r.row_num}: {r.lower_bound} to {r.upper_bound}           {tag}  {r.Event}, {r.Scene}, {r.Cluster} | {r.event_datetime}"
-#         )
