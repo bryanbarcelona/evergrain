@@ -25,3 +25,16 @@ target-version = "py312"
 known-first-party = ["evergrain"]
 combine-as-imports = true
 force-wrap-aliases = true
+
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple/"
+publish-url = "https://upload.pypi.org/legacy/"
+explicit = true
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
