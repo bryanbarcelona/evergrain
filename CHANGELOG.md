@@ -1,0 +1,14 @@
+## v0.2.0 (2026-01-04)
+
+### Feat
+
+- **inference**: implement temporal metadata machinery and clustering
+- add metadata automation using CSV helper (WiP, untested)
+
+### Fix
+
+- add commitizen section to toml for auto bump and changelog
+
+### Refactor
+
+- modularize metadata processing into structured package
