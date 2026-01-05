@@ -30,6 +30,7 @@ force-wrap-aliases = true
 [tool.commitizen]
 version_provider = "uv"
 tag_format = "v${version}"
+major_version_zero = true
 
 
 [[tool.uv.index]]
