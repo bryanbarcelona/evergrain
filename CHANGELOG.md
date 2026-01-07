@@ -1,3 +1,9 @@
+## v0.5.1 (2026-01-07)
+
+### Fix
+
+- add continue-on-error to bump job
+
 ## v0.5.0 (2026-01-07)
 
 ### Feat
