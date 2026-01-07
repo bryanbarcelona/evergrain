@@ -1,3 +1,9 @@
+## v0.5.2 (2026-01-07)
+
+### Fix
+
+- revert bump check to steps.cz.outputs.version
+
 ## v0.5.1 (2026-01-07)
 
 ### Fix
