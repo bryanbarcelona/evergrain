@@ -7,5 +7,7 @@ except importlib.metadata.PackageNotFoundError:
 
 from evergrain.core.metadata.engine import Metadata
 from evergrain.core.segmentation.engine import ScanBackground, PhotoSplitter
+from evergrain.core.discovery.engine import Discovery
+from evergrain.core.exceptions.discovery import DiscoveryError
 
-__all__ = ["Metadata", "ScanBackground", "PhotoSplitter"]
+__all__ = ["Metadata", "ScanBackground", "PhotoSplitter", "Discovery", "DiscoveryError"]

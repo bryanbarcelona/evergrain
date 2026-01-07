@@ -18,6 +18,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     outputs:
       version: ${{ steps.cz.outputs.version }}
+      bumped: ${{ steps.bump_check.outputs.bumped }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +31,7 @@ jobs:
       - run: uv sync --all-extras --dev --frozen
       - run: uv tool install commitizen
 
-      - name: Bump version, changelog & tag  (prepare only)
+      - name: Bump version, changelog & tag (prepare only)
         id: cz
         uses: commitizen-tools/commitizen-action@0.26.0
         with:
@@ -39,25 +40,34 @@ jobs:
           git_email: "bryan.barcelona@gmail.com"
           push: false
           changelog: true
-          no_raise: 21
+          no_raise: 21  # This makes the step succeed even with no eligible commits
+
+      - name: Detect if bump occurred
+        id: bump_check
+        run: |
+          if [[ "${{ steps.cz.outputs.version }}" != "${{ steps.cz.outputs.previous_version }}" ]]; then
+            echo "bumped=true" >> $GITHUB_OUTPUT
+          else
+            echo "bumped=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build distribution packages
-        if: steps.cz.outputs.version != ''
+        if: steps.bump_check.outputs.bumped == 'true'
         run: uv build
 
       - name: Publish to PyPI
-        if: steps.cz.outputs.version != ''
+        if: steps.bump_check.outputs.bumped == 'true'
         run: uv publish
 
       - name: Push commit & tag to repository
-        if: steps.cz.outputs.version != ''
+        if: steps.bump_check.outputs.bumped == 'true'
         run: |
           git push origin HEAD:main
           git push origin v${{ steps.cz.outputs.version }}
 
   release:
     needs: publish
-    if: ${{ needs.publish.outputs.version != '' }}
+    if: needs.publish.outputs.bumped == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
