@@ -43,32 +43,23 @@ jobs:
           changelog: true
           no_raise: 21  # This makes the step succeed even with no eligible commits
 
-      - name: Detect if bump occurred
-        id: bump_check
-        run: |
-          if [[ "${{ steps.cz.outputs.version }}" != "${{ steps.cz.outputs.previous_version }}" ]]; then
-            echo "bumped=true" >> $GITHUB_OUTPUT
-          else
-            echo "bumped=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Build distribution packages
-        if: steps.bump_check.outputs.bumped == 'true'
+        if: steps.cz.outputs.version != ''
         run: uv build
 
       - name: Publish to PyPI
-        if: steps.bump_check.outputs.bumped == 'true'
+        if: steps.cz.outputs.version != ''
         run: uv publish
 
       - name: Push commit & tag to repository
-        if: steps.bump_check.outputs.bumped == 'true'
+        if: steps.cz.outputs.version != ''
         run: |
           git push origin HEAD:main
           git push origin v${{ steps.cz.outputs.version }}
 
   release:
     needs: publish
-    if: needs.publish.outputs.bumped == 'true'
+    if: ${{ needs.publish.outputs.version != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -93,3 +84,53 @@ jobs:
       - name: Debug - Release created
         if: success()
         run: echo "::notice::✅ Release v${{ needs.publish.outputs.version }} created successfully"
+  #     - name: Detect if bump occurred
+  #       id: bump_check
+  #       run: |
+  #         if [[ "${{ steps.cz.outputs.version }}" != "${{ steps.cz.outputs.previous_version }}" ]]; then
+  #           echo "bumped=true" >> $GITHUB_OUTPUT
+  #         else
+  #           echo "bumped=false" >> $GITHUB_OUTPUT
+  #         fi
+
+  #     - name: Build distribution packages
+  #       if: steps.bump_check.outputs.bumped == 'true'
+  #       run: uv build
+
+  #     - name: Publish to PyPI
+  #       if: steps.bump_check.outputs.bumped == 'true'
+  #       run: uv publish
+
+  #     - name: Push commit & tag to repository
+  #       if: steps.bump_check.outputs.bumped == 'true'
+  #       run: |
+  #         git push origin HEAD:main
+  #         git push origin v${{ steps.cz.outputs.version }}
+
+  # release:
+  #   needs: publish
+  #   if: needs.publish.outputs.bumped == 'true'
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: v${{ needs.publish.outputs.version }}
+
+  #     - uses: astral-sh/setup-uv@v3
+  #     - run: uv build
+
+  #     - name: Create GitHub Release
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         tag_name: v${{ needs.publish.outputs.version }}
+  #         generate_release_notes: true
+  #         files: |
+  #           dist/*.whl
+  #           dist/*.tar.gz
+
+  #     - name: Debug - Release created
+  #       if: success()
+  #       run: echo "::notice::✅ Release v${{ needs.publish.outputs.version }} created successfully"
