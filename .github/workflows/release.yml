@@ -41,7 +41,7 @@ jobs:
           git_email: "bryan.barcelona@gmail.com"
           push: false
           changelog: true
-          no_raise: 21  # This makes the step succeed even with no eligible commits
+          no_raise: 21
 
       - name: Build distribution packages
         if: steps.cz.outputs.version != ''
