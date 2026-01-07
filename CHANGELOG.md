@@ -1,3 +1,9 @@
+## v0.3.0 (2026-01-07)
+
+### Feat
+
+- **segmentation**: refactor cropper into modular evergrain package structure
+
 ## v0.2.0 (2026-01-04)
 
 ### Feat
