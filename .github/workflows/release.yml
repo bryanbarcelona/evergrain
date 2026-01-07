@@ -33,6 +33,7 @@ jobs:
 
       - name: Bump version, changelog & tag (prepare only)
         id: cz
+        continue-on-error: true
         uses: commitizen-tools/commitizen-action@0.26.0
         with:
           github_token: ${{ secrets.PAT }}
