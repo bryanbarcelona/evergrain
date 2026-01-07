@@ -1,3 +1,9 @@
+## v0.4.0 (2026-01-07)
+
+### Feat
+
+- **segmentation**: add calibrated defaults for standalone photo splitting
+
 ## v0.3.0 (2026-01-07)
 
 ### Feat
