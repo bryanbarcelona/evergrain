@@ -1,3 +1,9 @@
+## v0.5.0 (2026-01-07)
+
+### Feat
+
+- **discovery**: add cross-platform removable-volume locator
+
 ## v0.4.1 (2026-01-07)
 
 ### Fix
