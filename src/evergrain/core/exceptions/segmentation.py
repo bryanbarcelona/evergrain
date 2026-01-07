@@ -1,0 +1,2 @@
+class EdgeReachedException(StopIteration):
+    pass
