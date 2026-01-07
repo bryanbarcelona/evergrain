@@ -20,8 +20,10 @@ class ScanBackground:
         color_variation (Tuple[float, float, float]): Standard deviation of RGB values indicating color variation.
     """
 
-    median_color: Tuple[float, float, float] = (245.0, 245.0, 245.0)
-    color_variation: Tuple[float, float, float] = (1.5, 1.5, 1.5)
+    # median_color: Tuple[float, float, float] = (245.0, 245.0, 245.0)
+    # color_variation: Tuple[float, float, float] = (1.5, 1.5, 1.5)
+    median_color: Tuple[float, float, float] = (252.0, 254.0, 251.0)
+    color_variation: Tuple[float, float, float] = (2.1714, 2.0376, 2.2785)
 
     @classmethod
     def from_image(cls, image: Image.Image, dpi: int, precision: int = 4) -> "ScanBackground":

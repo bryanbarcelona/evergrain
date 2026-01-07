@@ -1,7 +1,5 @@
-import logging
 from typing import Iterator, Tuple, Set, List
 
-import numpy as np
 from PIL import Image
 
 from evergrain.core.models.segmentation import ImageRegion
@@ -14,23 +12,42 @@ class PhotoSplitter:
     def __init__(
         self,
         image: Image.Image,
-        background_profile: ScanBackground,
         dpi: int,
+        background_profile: ScanBackground = None,
         sample_precision: int = 50,
         deskew: bool = True,
         contrast: int = 15,
         shrink: int = 3,
     ):
+        """
+        Initializes the PhotoSplitter to detect and extract photos from a scan.
+
+        Args:
+            image (Image.Image): The scanned image to process.
+            dpi (int): The scanning resolution in dots per inch.
+            background_profile (ScanBackground, optional): The color profile of
+                the scanner background. Defaults to calibrated factory values.
+            sample_precision (int): Number of sampling steps for the image.
+            deskew (bool): Whether to automatically straighten detected photos.
+            contrast (int): Sensitivity multiplier for background detection.
+            shrink (int): Pixel padding to remove from edges of detected photos.
+
+        Raises:
+            TypeError: If image or background_profile are the wrong types.
+            ValueError: If dpi is not a positive integer.
+        """
+
+        self.background = background_profile or ScanBackground()
+
         if not isinstance(image, Image.Image):
             raise TypeError("image must be a PIL Image")
-        if not isinstance(background_profile, ScanBackground):
+        if not isinstance(self.background, ScanBackground):
             raise TypeError("background_profile must be a ScanBackground instance")
         if not isinstance(dpi, int) or dpi <= 0:
             raise ValueError("dpi must be a positive integer")
 
         self.image = image
         self.width, self.height = image.size
-        self.background = background_profile
         self.dpi = dpi
         self.deskew_enabled = deskew
         self.contrast = contrast

@@ -1,6 +1,6 @@
 from PIL import Image as imgr
 import glob
-from cropper import PhotoSplitter, ScanBackground
+from legacy.cropper import PhotoSplitter, ScanBackground
 from orientation import correct_image_orientation, visualize_detections
 from enhancements import enhance_image_quality
 import os
