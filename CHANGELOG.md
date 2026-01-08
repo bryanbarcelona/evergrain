@@ -1,3 +1,10 @@
+## v0.6.0 (2026-01-08)
+
+### Feat
+
+- add core.enhancement sub-package with safe in-place overwrite
+- implement project-wide exception hierarchy
+
 ## v0.5.2 (2026-01-07)
 
 ### Fix
