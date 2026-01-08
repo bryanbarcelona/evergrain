@@ -1,4 +1,5 @@
-class DiscoveryError(RuntimeError):
-    """Raised when zero or more than one candidate source is found."""
+from evergrain.core.exceptions.base import EverGrainError
 
-    pass
+
+class DiscoveryError(EverGrainError):
+    """Exception raised during discovery process."""
