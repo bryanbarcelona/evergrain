@@ -1,7 +1,7 @@
 [project]
 name = "evergrain"
 version = "0.5.2"
-description = "Add your description here"
+description = "Intelligent photo scanning and organization with automated cropping, enhancement, metadata embedding, and file renaming."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
