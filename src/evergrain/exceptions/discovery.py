@@ -1,4 +1,4 @@
-from evergrain.core.exceptions.base import EverGrainError
+from evergrain.exceptions.base import EverGrainError
 
 
 class DiscoveryError(EverGrainError):
