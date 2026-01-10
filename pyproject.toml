@@ -11,28 +11,57 @@ dependencies = [
     "psutil>=7.2.1",
 ]
 
+[dependency-groups]
+dev = [
+    "taskipy>=1.14.1",
+]
+
+[tool.taskipy.tasks]
+lint = "uvx ruff check . --fix"
+format = "uvx ruff format ."
+type = "uvx ty check ."
+test = "uv run pytest"
+# run audit, then wipe its cache folder
+audit   = "uv run pip-audit --skip-editable && rmdir /s /q \"%LOCALAPPDATA%\\pip-audit\" >nul 2>&1" # THIS IS IMPORTANT BECAUSE PIP-AUDIT THINKS IT'S TOTALLY FINE TO LEAVE JUNK BEHIND
+#audit   = "uvx pip-audit"
+#license = "uvx licensecheck --zero"
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]
 build-backend = "uv_build"
 
-
 [tool.ruff]
 preview = true
 line-length = 120
 target-version = "py312"
+exclude = ["tests"]
+
+[tool.ruff.lint]
+select = [
+  "ANN201", "ANN001", "F401"
+]
+ignore = [
+    "ANN001"
+]
+
+#[tool.ruff.lint.per-file-ignores]
+# Don't force strict typing or docstrings in test files
+#"tests/*" = ["ANN001", "ANN201", "S101"]
+#"enhancements.py" =  ["ANN001", "ANN201", "S101"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["evergrain"]
 combine-as-imports = true
 force-wrap-aliases = true
 
+[tool.ruff.format]
+quote-style = "single"
+docstring-code-format = true
 
 [tool.commitizen]
 version_provider = "uv"
 tag_format = "v${version}"
 major_version_zero = true
-
 
 [[tool.uv.index]]
 name = "pypi"
