@@ -9,26 +9,26 @@ from evergrain.utils.validators import _is_valid_date
 def load_metadata_csv(csv_path: Path) -> List[MetadataRow]:
     """Load metadata from CSV file into a list of MetadataRow objects."""
     if not csv_path.exists():
-        raise FileNotFoundError(f"CSV file not found: {csv_path}")
+        raise FileNotFoundError(f'CSV file not found: {csv_path}')
 
     rows: List[MetadataRow] = []
-    with open(csv_path, newline="", encoding="utf-8") as f:
+    with open(csv_path, newline='', encoding='utf-8') as f:
         sample = f.read(2048)
         f.seek(0)
         try:
-            dialect = csv.Sniffer().sniff(sample, delimiters=[",", ";"])
+            dialect = csv.Sniffer().sniff(sample, delimiters=[',', ';'])
             delimiter = dialect.delimiter
         except csv.Error:
-            delimiter = ","
+            delimiter = ','
         reader = csv.DictReader(f, delimiter=delimiter)
         for rn, raw in enumerate(reader, start=2):
             # Parse and clamp time components
-            year = _to_int_or_none(raw.get("YY", ""))
-            month = _to_int_or_none(raw.get("MM", ""))
-            day = _to_int_or_none(raw.get("DD", ""))
-            hour = _clamp_time_component(_to_int_or_none(raw.get("HH", "")), 0, 23)
-            minute = _clamp_time_component(_to_int_or_none(raw.get("MN", "")), 0, 59)
-            second = _clamp_time_component(_to_int_or_none(raw.get("SS", "")), 0, 59)
+            year = _to_int_or_none(raw.get('YY', ''))
+            month = _to_int_or_none(raw.get('MM', ''))
+            day = _to_int_or_none(raw.get('DD', ''))
+            hour = _clamp_time_component(_to_int_or_none(raw.get('HH', '')), 0, 23)
+            minute = _clamp_time_component(_to_int_or_none(raw.get('MN', '')), 0, 59)
+            second = _clamp_time_component(_to_int_or_none(raw.get('SS', '')), 0, 59)
 
             # Validate day against month/year; invalidate if impossible
             if not _is_valid_date(year, month, day):
@@ -36,11 +36,11 @@ def load_metadata_csv(csv_path: Path) -> List[MetadataRow]:
 
             rows.append(
                 MetadataRow(
-                    Event=(raw.get("Event") or "").strip() or None,
-                    Scene=(raw.get("Scene") or "").strip() or None,
-                    Location=(raw.get("Location") or "").strip() or None,
-                    Tags=(raw.get("Tags") or "").strip() or None,
-                    Cluster=(raw.get("Cluster") or "").strip() or None,
+                    Event=(raw.get('Event') or '').strip() or None,
+                    Scene=(raw.get('Scene') or '').strip() or None,
+                    Location=(raw.get('Location') or '').strip() or None,
+                    Tags=(raw.get('Tags') or '').strip() or None,
+                    Cluster=(raw.get('Cluster') or '').strip() or None,
                     year=year,
                     month=month,
                     day=day,

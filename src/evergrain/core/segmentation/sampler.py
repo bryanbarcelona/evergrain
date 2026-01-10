@@ -3,14 +3,14 @@ from typing import Iterator, Tuple
 from PIL import Image
 
 from evergrain.core.models.segmentation import PixelData
-from evergrain.core.exceptions.segmentation import EdgeReachedException
+from evergrain.exceptions.segmentation import EdgeReachedException
 
 
 class Direction:
-    UP = "up"
-    DOWN = "down"
-    LEFT = "left"
-    RIGHT = "right"
+    UP = 'up'
+    DOWN = 'down'
+    LEFT = 'left'
+    RIGHT = 'right'
 
 
 class ImageSampler:
@@ -71,7 +71,7 @@ class ImageSampler:
         elif direction == Direction.RIGHT:
             return self._move_right(x, y, distance)
         else:
-            raise ValueError(f"Unknown direction: {direction}")
+            raise ValueError(f'Unknown direction: {direction}')
 
     def _move_up(self, x: int, y: int, distance: int) -> PixelData:
         if y <= distance:

@@ -26,7 +26,7 @@ class ScanBackground:
     color_variation: Tuple[float, float, float] = (2.1714, 2.0376, 2.2785)
 
     @classmethod
-    def from_image(cls, image: Image.Image, dpi: int, precision: int = 4) -> "ScanBackground":
+    def from_image(cls, image: Image.Image, dpi: int, precision: int = 4) -> 'ScanBackground':
         """
         Creates a ScanBackground profile by sampling pixels from the given image.
 
@@ -43,7 +43,7 @@ class ScanBackground:
             ScanBackground: A background color profile with median color and color variation.
         """
         if not image:
-            logging.error("ScanBackground.from_image received None image.")
+            logging.error('ScanBackground.from_image received None image.')
             return cls()
 
         precision = min(max(precision, 1), dpi)
@@ -52,11 +52,11 @@ class ScanBackground:
 
         for y in range(step, image.height, step):
             for x in range(step, image.width, step):
-                img_rgb = image.convert("RGB") if image.mode not in ("RGB", "L", "P") else image
+                img_rgb = image.convert('RGB') if image.mode not in ('RGB', 'L', 'P') else image
                 pixels_rgb.append(img_rgb.getpixel((x, y))[:3])
 
         if not pixels_rgb:
-            logging.warning("No pixels sampled in ScanBackground.from_image.")
+            logging.warning('No pixels sampled in ScanBackground.from_image.')
             return cls()
 
         array = np.array(pixels_rgb)
@@ -75,7 +75,7 @@ class ScanBackground:
         Returns:
             bool: True if the pixel color is within the tolerated range of the background color; False otherwise.
         """
-        color_keys = ["r", "g", "b"]
+        color_keys = ['r', 'g', 'b']
         values = dict(zip(color_keys, pixel_color))
         medians = dict(zip(color_keys, self.median_color))
         stds = dict(zip(color_keys, self.color_variation))

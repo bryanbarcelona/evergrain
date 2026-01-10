@@ -29,18 +29,18 @@ def _normalize_years(rows: List[MetadataRow]) -> List[MetadataRow]:
 def _resolve_cluster_names(rows: List[MetadataRow]) -> List[MetadataRow]:
     """Normalize cluster names for typo tolerance (e.g., 'tC12' → 'tightCluster12')."""
     for row in rows:
-        cluster_raw = (row.Cluster or "").strip()
+        cluster_raw = (row.Cluster or '').strip()
         if not cluster_raw:
             continue
         cluster_lower = cluster_raw.lower()
-        match = re.search(r"\d+", cluster_lower)
+        match = re.search(r'\d+', cluster_lower)
         if not match:
             raise ValueError(f"Row {row.row_num}: Invalid Cluster='{cluster_raw}', no numeric suffix.")
         number = match.group()
-        if re.match(r"t.*c.*\d+", cluster_lower):
-            row.Cluster = f"tightCluster{number}"
-        elif re.match(r"l.*c.*\d+", cluster_lower):
-            row.Cluster = f"looseCluster{number}"
+        if re.match(r't.*c.*\d+', cluster_lower):
+            row.Cluster = f'tightCluster{number}'
+        elif re.match(r'l.*c.*\d+', cluster_lower):
+            row.Cluster = f'looseCluster{number}'
         else:
             raise ValueError(f"Row {row.row_num}: Invalid Cluster='{cluster_raw}'.")
     return rows
@@ -57,7 +57,7 @@ def _assign_undeclared_clusters(rows: List[MetadataRow]) -> List[MetadataRow]:
         used_indices = set()
         unclustered = []
         for row in scene_rows:
-            if row.Cluster and isinstance(row.Cluster, str) and row.Cluster.startswith("tightCluster"):
+            if row.Cluster and isinstance(row.Cluster, str) and row.Cluster.startswith('tightCluster'):
                 try:
                     idx = int(row.Cluster[12:])
                     used_indices.add(idx)
@@ -69,7 +69,7 @@ def _assign_undeclared_clusters(rows: List[MetadataRow]) -> List[MetadataRow]:
         for row in unclustered:
             while next_idx in used_indices:
                 next_idx += 1
-            row.Cluster = f"tightCluster{next_idx}"
+            row.Cluster = f'tightCluster{next_idx}'
             used_indices.add(next_idx)
             next_idx += 1
     return rows
@@ -77,9 +77,9 @@ def _assign_undeclared_clusters(rows: List[MetadataRow]) -> List[MetadataRow]:
 
 # ID assignment functions
 
-TEMP_EVENT_PREFIX = "__TEMP_EVENT_"
-TEMP_SCENE_PREFIX = "__TEMP_SCENE_"
-TEMP_CLUSTER_PREFIX = "__TEMP_CLUSTER_"
+TEMP_EVENT_PREFIX = '__TEMP_EVENT_'
+TEMP_SCENE_PREFIX = '__TEMP_SCENE_'
+TEMP_CLUSTER_PREFIX = '__TEMP_CLUSTER_'
 
 
 def _fill_none_with_temporaries(rows: List[MetadataRow]) -> List[MetadataRow]:
@@ -94,17 +94,17 @@ def _fill_none_with_temporaries(rows: List[MetadataRow]) -> List[MetadataRow]:
     for row in rows:
         # Replace None Event with temporary
         if row.Event is None:
-            row.Event = f"{TEMP_EVENT_PREFIX}{temp_event_counter}"
+            row.Event = f'{TEMP_EVENT_PREFIX}{temp_event_counter}'
             temp_event_counter += 1
 
         # Replace None Scene with temporary
         if row.Scene is None:
-            row.Scene = f"{TEMP_SCENE_PREFIX}{temp_scene_counter}"
+            row.Scene = f'{TEMP_SCENE_PREFIX}{temp_scene_counter}'
             temp_scene_counter += 1
 
         # Replace None Cluster with temporary
         if row.Cluster is None:
-            row.Cluster = f"{TEMP_CLUSTER_PREFIX}{temp_cluster_counter}"
+            row.Cluster = f'{TEMP_CLUSTER_PREFIX}{temp_cluster_counter}'
             temp_cluster_counter += 1
 
     return rows
@@ -161,7 +161,7 @@ def _assign_ids(rows: List[MetadataRow]) -> List[MetadataRow]:
 
         # Create unique_group_id
         if row.event_id is not None and row.scene_id is not None and row.cluster_id is not None:
-            row.unique_group_id = f"{row.event_id:03d}-{row.scene_id:03d}-{row.cluster_id:03d}"
+            row.unique_group_id = f'{row.event_id:03d}-{row.scene_id:03d}-{row.cluster_id:03d}'
 
     rows = _cleanup_temporaries(rows)
 

@@ -8,7 +8,7 @@ def auto_tone(image: Image.Image) -> Image.Image:
 
     r, g, b = image.split()
     return Image.merge(
-        "RGB",
+        'RGB',
         (
             ImageOps.autocontrast(r, cutoff=0),
             ImageOps.autocontrast(g, cutoff=0),
@@ -18,14 +18,14 @@ def auto_tone(image: Image.Image) -> Image.Image:
 
 
 def auto_contrast(image: Image.Image) -> Image.Image:
-    if image.mode != "RGB":
-        image = image.convert("RGB")
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
     return ImageOps.autocontrast(image, cutoff=0)
 
 
 def auto_color(image: Image.Image, black_pct: float, white_pct: float) -> Image.Image:
-    if image.mode != "RGB":
-        image = image.convert("RGB")
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
     arr = np.asarray(image, dtype=np.float32)
     out_channels = []
     for ch in arr.transpose(2, 0, 1):
@@ -36,7 +36,7 @@ def auto_color(image: Image.Image, black_pct: float, white_pct: float) -> Image.
             continue
         scaled = (ch - lo) * (255.0 / (hi - lo))
         out_channels.append(np.clip(scaled, 0, 255).astype(np.uint8))
-    return Image.fromarray(np.stack(out_channels, axis=-1), "RGB")
+    return Image.fromarray(np.stack(out_channels, axis=-1), 'RGB')
 
 
 def despeckle(image: Image.Image, size: int) -> Image.Image:

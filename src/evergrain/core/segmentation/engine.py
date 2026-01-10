@@ -40,11 +40,11 @@ class PhotoSplitter:
         self.background = background_profile or ScanBackground()
 
         if not isinstance(image, Image.Image):
-            raise TypeError("image must be a PIL Image")
+            raise TypeError('image must be a PIL Image')
         if not isinstance(self.background, ScanBackground):
-            raise TypeError("background_profile must be a ScanBackground instance")
+            raise TypeError('background_profile must be a ScanBackground instance')
         if not isinstance(dpi, int) or dpi <= 0:
-            raise ValueError("dpi must be a positive integer")
+            raise ValueError('dpi must be a positive integer')
 
         self.image = image
         self.width, self.height = image.size

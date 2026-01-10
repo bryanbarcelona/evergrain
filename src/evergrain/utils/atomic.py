@@ -19,7 +19,7 @@ def atomic_replace(target: Path, saver: Callable[[Path], None]) -> None:
     """
     target = target.resolve()
     tmp_dir = target.parent
-    fd, tmp_path = tempfile.mkstemp(dir=tmp_dir, prefix=target.stem + ".", suffix=target.suffix)
+    fd, tmp_path = tempfile.mkstemp(dir=tmp_dir, prefix=target.stem + '.', suffix=target.suffix)
     os.close(fd)
     try:
         saver(Path(tmp_path))

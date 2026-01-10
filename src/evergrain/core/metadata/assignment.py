@@ -47,13 +47,13 @@ def assign_datetime(metadata_rows: List[MetadataRow]) -> List[MetadataRow]:
     duplicates = find_duplicates(assigned_rows)
 
     if not duplicates:
-        raise RuntimeError("Unexpected: max attempts reached but no duplicates found on final check.")
+        raise RuntimeError('Unexpected: max attempts reached but no duplicates found on final check.')
 
-    conflict_details = [f"  {dt} → Rows: {sorted(rows)}" for dt, rows in duplicates.items()]
+    conflict_details = [f'  {dt} → Rows: {sorted(rows)}' for dt, rows in duplicates.items()]
 
     raise RuntimeError(
-        f"Failed to assign unique photo_datetimes after {max_attempts} attempts.\n"
-        f"Final conflicting timestamps (at second resolution):\n" + "\n".join(conflict_details)
+        f'Failed to assign unique photo_datetimes after {max_attempts} attempts.\n'
+        f'Final conflicting timestamps (at second resolution):\n' + '\n'.join(conflict_details)
     )
 
 

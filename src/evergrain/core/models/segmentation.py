@@ -48,8 +48,7 @@ class ImageRegion:
         return (self.left, self.top, self.right, self.bottom)
 
     def calculate_overlap_ratio(self, other: 'ImageRegion') -> float:
-        if (self.top > other.bottom or self.bottom < other.top or
-            self.right < other.left or self.left > other.right):
+        if self.top > other.bottom or self.bottom < other.top or self.right < other.left or self.left > other.right:
             return 0.0
 
         overlap_width = min(self.right, other.right) - max(self.left, other.left)
