@@ -1,8 +1,10 @@
+# ruff: noqa: ARG002,ARG004
+from abc import abstractmethod
+from collections.abc import Iterator
 from math import atan2
-from typing import Iterator
 
-from evergrain.core.segmentation.sampler import ImageSampler, Direction
 from evergrain.core.models.segmentation import PixelData
+from evergrain.core.segmentation.sampler import Direction, ImageSampler
 
 
 class EdgeDetector:
@@ -13,6 +15,28 @@ class EdgeDetector:
         self.sampler = sampler
         self.width = sampler.width
         self.height = sampler.height
+        self.step_size = self._calculate_step_size()  # Call abstract method
+
+    @abstractmethod
+    def _calculate_step_size(self) -> float:
+        """Calculate the step size for this edge detector."""
+
+    @abstractmethod
+    def get_parallel_samples(self) -> Iterator[PixelData]:
+        """Get samples along the edge."""
+
+    @abstractmethod
+    def get_perpendicular_samples(self, x: int, y: int) -> Iterator[PixelData]:
+        """Get samples perpendicular to the edge from a starting point."""
+
+    @staticmethod
+    @abstractmethod
+    def get_distance(x: int, y: int) -> int:
+        """Get the distance from the edge reference."""
+
+    @abstractmethod
+    def calculate_angle(self, prev_distance: int, x: int, y: int) -> float:
+        """Calculate the angle based on previous and current positions."""
 
 
 class TopEdgeDetector(EdgeDetector):
@@ -22,6 +46,9 @@ class TopEdgeDetector(EdgeDetector):
         self.start_x = self.step_size
         self.start_y = 0
 
+    def _calculate_step_size(self) -> float:
+        return self.width / self.PRECISION
+
     def get_parallel_samples(self) -> Iterator[PixelData]:
         return self.sampler.traverse(
             Direction.RIGHT, int(self.start_x), int(self.start_y), int(self.step_size), self.SAMPLE_COUNT
@@ -30,7 +57,8 @@ class TopEdgeDetector(EdgeDetector):
     def get_perpendicular_samples(self, x: int, y: int) -> Iterator[PixelData]:
         return self.sampler.traverse(Direction.DOWN, x, y, 1)
 
-    def get_distance(self, x: int, y: int) -> int:
+    @staticmethod
+    def get_distance(x: int, y: int) -> int:
         return y
 
     def calculate_angle(self, prev_distance: int, x: int, y: int) -> float:
@@ -44,6 +72,9 @@ class RightEdgeDetector(TopEdgeDetector):
         self.start_x = self.sampler.width - 1
         self.start_y = self.step_size
 
+    def _calculate_step_size(self) -> float:
+        return self.height / self.PRECISION
+
     def get_parallel_samples(self) -> Iterator[PixelData]:
         return self.sampler.traverse(
             Direction.DOWN, int(self.start_x), int(self.start_y), int(self.step_size), self.SAMPLE_COUNT
@@ -52,7 +83,8 @@ class RightEdgeDetector(TopEdgeDetector):
     def get_perpendicular_samples(self, x: int, y: int) -> Iterator[PixelData]:
         return self.sampler.traverse(Direction.LEFT, x, y, 1)
 
-    def get_distance(self, x: int, y: int) -> int:
+    @staticmethod
+    def get_distance(x: int, y: int) -> int:
         return x
 
     def calculate_angle(self, prev_distance: int, x: int, y: int) -> float:
@@ -66,6 +98,9 @@ class BottomEdgeDetector(TopEdgeDetector):
         self.start_x = self.sampler.width - self.step_size
         self.start_y = self.sampler.height - 1
 
+    def _calculate_step_size(self) -> float:
+        return self.width / self.PRECISION
+
     def get_parallel_samples(self) -> Iterator[PixelData]:
         return self.sampler.traverse(
             Direction.LEFT, int(self.start_x), int(self.start_y), int(self.step_size), self.SAMPLE_COUNT
@@ -74,7 +109,8 @@ class BottomEdgeDetector(TopEdgeDetector):
     def get_perpendicular_samples(self, x: int, y: int) -> Iterator[PixelData]:
         return self.sampler.traverse(Direction.UP, x, y, 1)
 
-    def get_distance(self, x: int, y: int) -> int:
+    @staticmethod
+    def get_distance(x: int, y: int) -> int:
         return y
 
     def calculate_angle(self, prev_distance: int, x: int, y: int) -> float:
@@ -88,6 +124,9 @@ class LeftEdgeDetector(TopEdgeDetector):
         self.start_x = 0
         self.start_y = self.sampler.height - self.step_size
 
+    def _calculate_step_size(self) -> float:
+        return self.height / self.PRECISION
+
     def get_parallel_samples(self) -> Iterator[PixelData]:
         return self.sampler.traverse(
             Direction.UP, int(self.start_x), int(self.start_y), int(self.step_size), self.SAMPLE_COUNT
@@ -96,7 +135,8 @@ class LeftEdgeDetector(TopEdgeDetector):
     def get_perpendicular_samples(self, x: int, y: int) -> Iterator[PixelData]:
         return self.sampler.traverse(Direction.RIGHT, x, y, 1)
 
-    def get_distance(self, x: int, y: int) -> int:
+    @staticmethod
+    def get_distance(x: int, y: int) -> int:
         return x
 
     def calculate_angle(self, prev_distance: int, x: int, y: int) -> float:

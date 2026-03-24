@@ -1,5 +1,5 @@
+from functools import lru_cache
 from pathlib import Path
-from typing import Any
 
 import cv2
 
@@ -9,17 +9,25 @@ def _model_path(filename: str) -> str:
     return str(Path(__file__).with_suffix('').parent / 'models' / filename)
 
 
-def load_face_net() -> Any:
-    if not hasattr(load_face_net, '_net'):
-        prototxt = _model_path('deploy_faces.prototxt')
-        caffemodel = _model_path('faces_dnn.caffemodel')
-        load_face_net._net = cv2.dnn.readNetFromCaffe(prototxt, caffemodel)
-    return load_face_net._net
+@lru_cache(maxsize=1)
+def load_face_net() -> cv2.dnn.Net:
+    """Load the face detection Caffe model.
+
+    Returns:
+        cv2.dnn.Net: The loaded face detection network.
+    """
+    prototxt = _model_path('deploy_faces.prototxt')
+    caffemodel = _model_path('faces_dnn.caffemodel')
+    return cv2.dnn.readNetFromCaffe(prototxt, caffemodel)
 
 
-def load_person_net() -> Any:
-    if not hasattr(load_person_net, '_net'):
-        prototxt = _model_path('deploy_person.prototxt.txt')
-        caffemodel = _model_path('person_dnn.caffemodel')
-        load_person_net._net = cv2.dnn.readNetFromCaffe(prototxt, caffemodel)
-    return load_person_net._net
+@lru_cache(maxsize=1)
+def load_person_net() -> cv2.dnn.Net:
+    """Load the person detection Caffe model.
+
+    Returns:
+        cv2.dnn.Net: The loaded person detection network.
+    """
+    prototxt = _model_path('deploy_person.prototxt.txt')
+    caffemodel = _model_path('person_dnn.caffemodel')
+    return cv2.dnn.readNetFromCaffe(prototxt, caffemodel)

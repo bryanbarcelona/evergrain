@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from PIL import Image
@@ -16,11 +16,11 @@ class PixelData:
     b: int
 
     @property
-    def position(self) -> Tuple[int, int]:
+    def position(self) -> tuple[int, int]:
         return (self.x, self.y)
 
     @property
-    def color(self) -> Tuple[int, int, int]:
+    def color(self) -> tuple[int, int, int]:
         return (self.r, self.g, self.b)
 
 
@@ -44,10 +44,10 @@ class ImageRegion:
         return self.width * self.height
 
     @property
-    def bounds(self) -> Tuple[int, int, int, int]:
+    def bounds(self) -> tuple[int, int, int, int]:
         return (self.left, self.top, self.right, self.bottom)
 
-    def calculate_overlap_ratio(self, other: 'ImageRegion') -> float:
+    def calculate_overlap_ratio(self, other: ImageRegion) -> float:
         if self.top > other.bottom or self.bottom < other.top or self.right < other.left or self.left > other.right:
             return 0.0
 
@@ -58,13 +58,13 @@ class ImageRegion:
         smaller_area = min(self.area, other.area)
         return float(overlap_area) / smaller_area if smaller_area > 0 else 0.0
 
-    def try_merge_with(self, other: 'ImageRegion', threshold: float = 0.15) -> bool:
+    def try_merge_with(self, other: ImageRegion, threshold: float = 0.15) -> bool:
         if self.calculate_overlap_ratio(other) >= threshold:
             self.merge_with(other)
             return True
         return False
 
-    def merge_with(self, other: 'ImageRegion') -> None:
+    def merge_with(self, other: ImageRegion) -> None:
         self.top = min(self.top, other.top)
         self.bottom = max(self.bottom, other.bottom)
         self.left = min(self.left, other.left)
@@ -80,5 +80,5 @@ class ImageRegion:
 @dataclass
 class DeskewResult:
     image: Image.Image
-    margins: Tuple[int, int, int, int]
+    margins: tuple[int, int, int, int]
     rotation_angle: float

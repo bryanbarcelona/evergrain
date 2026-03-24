@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
-from evergrain.core.enhancement.params import EnhancementParams
 from evergrain.core.enhancement import filters
+from evergrain.core.enhancement.params import EnhancementParams
 from evergrain.exceptions.enhancement import InvalidImageError
 from evergrain.utils import io
 
@@ -19,7 +19,7 @@ class EnhancementEngine:
     def __init__(self, params: EnhancementParams | None = None) -> None:
         self.params = params or EnhancementParams()
 
-    def enhance(self, image: Image.Image) -> Image.Image:
+    def _enhance(self, image: Image.Image) -> Image.Image:
         if image.mode != 'RGB':
             image = image.convert('RGB')
 
@@ -46,18 +46,18 @@ class EnhancementEngine:
         in_path: Path | str,
         out_path: Path | str | None = None,
         *,
-        format: Literal['JPEG', 'PNG', 'TIFF'] | None = None,
+        file_format: Literal['JPEG', 'PNG', 'TIFF'] | None = None,
     ) -> None:
         in_path = Path(in_path)
         if not in_path.exists():
             raise InvalidImageError(f'Input file not found: {in_path}')
 
         image = io.load_image(in_path)
-        enhanced = self.enhance(image)
+        enhanced = self._enhance(image)
 
         if out_path is None:
             io.overwrite_image(enhanced, in_path)
             logger.debug('Enhanced image saved in-place: %s', in_path)
         else:
-            io.save_image(enhanced, out_path, format=format)
+            io.save_image(enhanced, out_path, format=file_format)
             logger.debug('Enhanced image saved to: %s', out_path)

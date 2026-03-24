@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 from dataclasses import dataclass
 
 import numpy as np
@@ -20,10 +19,8 @@ class ScanBackground:
         color_variation (Tuple[float, float, float]): Standard deviation of RGB values indicating color variation.
     """
 
-    # median_color: Tuple[float, float, float] = (245.0, 245.0, 245.0)
-    # color_variation: Tuple[float, float, float] = (1.5, 1.5, 1.5)
-    median_color: Tuple[float, float, float] = (252.0, 254.0, 251.0)
-    color_variation: Tuple[float, float, float] = (2.1714, 2.0376, 2.2785)
+    median_color: tuple[float, float, float] = (252.0, 254.0, 251.0)
+    color_variation: tuple[float, float, float] = (2.1714, 2.0376, 2.2785)
 
     @classmethod
     def from_image(cls, image: Image.Image, dpi: int, precision: int = 4) -> 'ScanBackground':
@@ -52,8 +49,16 @@ class ScanBackground:
 
         for y in range(step, image.height, step):
             for x in range(step, image.width, step):
-                img_rgb = image.convert('RGB') if image.mode not in ('RGB', 'L', 'P') else image
-                pixels_rgb.append(img_rgb.getpixel((x, y))[:3])
+                pixel = image.getpixel((x, y))
+                # Handle different pixel formats
+                if isinstance(pixel, (int, float)):
+                    # Grayscale or indexed color - convert to RGB tuple
+                    pixel_rgb = (pixel, pixel, pixel)
+                elif isinstance(pixel, tuple) and len(pixel) >= 3:
+                    pixel_rgb = pixel[:3]
+                else:
+                    continue
+                pixels_rgb.append(pixel_rgb)
 
         if not pixels_rgb:
             logging.warning('No pixels sampled in ScanBackground.from_image.')
@@ -64,7 +69,7 @@ class ScanBackground:
         color_var = tuple(np.std(array, axis=0))
         return cls(median_color=median_c, color_variation=color_var)
 
-    def matches(self, pixel_color: Tuple[int, int, int], spread: float) -> bool:
+    def matches(self, pixel_color: tuple[int, int, int], spread: float) -> bool:
         """
         Determines if a pixel color matches the background color profile within a given tolerance.
 
@@ -76,8 +81,8 @@ class ScanBackground:
             bool: True if the pixel color is within the tolerated range of the background color; False otherwise.
         """
         color_keys = ['r', 'g', 'b']
-        values = dict(zip(color_keys, pixel_color))
-        medians = dict(zip(color_keys, self.median_color))
-        stds = dict(zip(color_keys, self.color_variation))
+        values = dict(zip(color_keys, pixel_color, strict=False))
+        medians = dict(zip(color_keys, self.median_color, strict=False))
+        stds = dict(zip(color_keys, self.color_variation, strict=False))
 
         return all(abs(medians[k] - values[k]) <= stds[k] * spread for k in color_keys)

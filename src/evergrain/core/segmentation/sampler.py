@@ -1,4 +1,4 @@
-from typing import Iterator, Tuple
+from collections.abc import Iterator
 
 from PIL import Image
 
@@ -22,7 +22,7 @@ class ImageSampler:
         self.precision = max(1, min(precision, dpi))
         self.step = int(self.dpi / self.precision)
 
-    def __iter__(self) -> Iterator[Tuple[int, int, int, int, int]]:
+    def __iter__(self) -> Iterator[tuple[int, int, int, int, int]]:
         for pixel in self.traverse(Direction.DOWN, self.step, self.step):
             for right_pixel in self.traverse(Direction.RIGHT, pixel.x, pixel.y, self.step):
                 yield (right_pixel.x, right_pixel.y, right_pixel.r, right_pixel.g, right_pixel.b)
@@ -50,7 +50,7 @@ class ImageSampler:
             except EdgeReachedException:
                 return
 
-    def get_adjacent_pixels(self, x: int, y: int, distance: int = 0) -> Iterator[Tuple[int, int, int, int, int]]:
+    def get_adjacent_pixels(self, x: int, y: int, distance: int = 0) -> Iterator[tuple[int, int, int, int, int]]:
         for direction in [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]:
             try:
                 pixel = self._move_in_direction(x, y, direction, distance)
@@ -94,5 +94,5 @@ class ImageSampler:
         return self._get_pixel(x + distance, y)
 
     def _get_pixel(self, x: int, y: int) -> PixelData:
-        r, g, b = self._pixel_data[x, y][:3]
+        r, g, b = self._pixel_data[x, y][:3]  # type: ignore[index]
         return PixelData(x, y, r, g, b)

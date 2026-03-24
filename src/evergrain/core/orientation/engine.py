@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 import cv2
 
@@ -9,10 +8,10 @@ from evergrain.utils import io
 
 
 class OrientationEngine:
+    @staticmethod
     def correct_image_orientation(
-        self,
         image_path: str | Path,
-        save_path: Optional[str | Path] = None,
+        save_path: str | Path | None = None,
     ) -> None:
         image_path = Path(image_path)
         angle = detect_landscape_orientation(str(image_path))
@@ -25,8 +24,8 @@ class OrientationEngine:
         output_path = Path(save_path) if save_path else image_path
         io.overwrite_image(rotated, output_path)
 
+    @staticmethod
     def visualize_detections(
-        self,
         image_path: str | Path,
         mode: str = 'face',
         conf_threshold: float = 0.7,

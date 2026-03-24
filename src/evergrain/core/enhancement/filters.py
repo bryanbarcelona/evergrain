@@ -1,5 +1,5 @@
 import numpy as np
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
 
 def auto_tone(image: Image.Image) -> Image.Image:

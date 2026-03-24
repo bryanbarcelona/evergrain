@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import platform
 from pathlib import Path
-from typing import Optional
 
 import psutil
 
@@ -22,7 +21,7 @@ class Discovery:
         self.marker = marker
         self.sub_path = Path(sub_path)
 
-    def find(self, override: Optional[str | Path] = None) -> Path:
+    def find(self, override: str | Path | None = None) -> Path:
         """Return resolved Path to the sub-directory; raise DiscoveryError."""
         if override:
             override = Path(override)
@@ -59,9 +58,10 @@ class Discovery:
         try:
             with path.open('rb') as fh:
                 head = fh.readline().rstrip(b'\r\n')
-            return head == b'evergrain-source v1'
         except OSError:
             return False
+        else:
+            return head == b'evergrain-source v1'
 
     @staticmethod
     def _removable_volumes() -> list[Path]:
@@ -71,8 +71,7 @@ class Discovery:
             # Windows -> "removable",  macOS/Linux -> "msdos"/"exfat" without "noauto"
             if part.opts and 'removable' in part.opts:
                 removable.append(Path(part.mountpoint))
-            elif platform.system() != 'Windows':
+            elif platform.system() != 'Windows' and part.mountpoint.startswith(('/media/', '/Volumes/')):
                 # Linux/macOS: treat anything mounted under /media or /Volumes as removable
-                if part.mountpoint.startswith(('/media/', '/Volumes/')):
-                    removable.append(Path(part.mountpoint))
+                removable.append(Path(part.mountpoint))
         return removable

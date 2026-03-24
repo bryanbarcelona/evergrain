@@ -1,19 +1,21 @@
-from typing import Iterator, Tuple, Set, List
+from collections import deque
+from collections.abc import Iterator
 
 from PIL import Image
 
 from evergrain.core.models.segmentation import ImageRegion
-from evergrain.core.segmentation.sampler import ImageSampler
-from evergrain.core.segmentation.deskew import PhotoDeskewer
 from evergrain.core.segmentation.background import ScanBackground
+from evergrain.core.segmentation.deskew import PhotoDeskewer
+from evergrain.core.segmentation.sampler import ImageSampler
 
 
 class PhotoSplitter:
     def __init__(
         self,
         image: Image.Image,
-        dpi: int,
-        background_profile: ScanBackground = None,
+        *,
+        dpi: int = 600,
+        background_profile: ScanBackground | None = None,
         sample_precision: int = 50,
         deskew: bool = True,
         contrast: int = 15,
@@ -66,7 +68,7 @@ class PhotoSplitter:
             else:
                 yield subimage
 
-    def _find_photo_regions(self) -> List[ImageRegion]:
+    def _find_photo_regions(self) -> list[ImageRegion]:
         regions = []
 
         for x, y, r, g, b in self.sampler:
@@ -77,7 +79,7 @@ class PhotoSplitter:
 
             connected = self._flood_fill((x, y, r, g, b))
             if connected:
-                xs, ys = zip(*connected)
+                xs, ys = zip(*connected, strict=True)
                 new_region = ImageRegion(min(xs), min(ys), max(xs), max(ys))
                 merged = any(r.try_merge_with(new_region) for r in regions)
                 if not merged:
@@ -86,14 +88,14 @@ class PhotoSplitter:
         min_area = self.dpi**2
         return [r for r in regions if r.is_larger_than(min_area)]
 
-    def _flood_fill(self, start_pixel: Tuple[int, int, int, int, int]) -> Set[Tuple[int, int]]:
-        x, y, r, g, b = start_pixel
+    def _flood_fill(self, start_pixel: tuple[int, int, int, int, int]) -> set[tuple[int, int]]:
+        x, y, _, _, _ = start_pixel
         start_pos = (x, y)
-        to_visit = [start_pos]
-        visited = set(to_visit)
+        to_visit = deque([start_pos])
+        visited = {start_pos}
 
-        for pos in to_visit:
-            px, py = pos
+        while to_visit:
+            px, py = to_visit.popleft()
             for ax, ay, ar, ag, ab in self.sampler.get_adjacent_pixels(px, py):
                 adj_pos = (ax, ay)
                 if adj_pos not in visited:

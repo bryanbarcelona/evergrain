@@ -1,19 +1,19 @@
 from math import degrees
-from typing import Tuple
 
 import numpy as np
 from PIL import Image
 from PIL.Image import Resampling
 
-from evergrain.core.segmentation.sampler import ImageSampler
-from evergrain.core.segmentation.edge_detectors import (
-    LeftEdgeDetector,
-    TopEdgeDetector,
-    RightEdgeDetector,
-    BottomEdgeDetector,
-)
 from evergrain.core.models.segmentation import DeskewResult
 from evergrain.core.segmentation.background import ScanBackground
+from evergrain.core.segmentation.edge_detectors import (
+    BottomEdgeDetector,
+    EdgeDetector,
+    LeftEdgeDetector,
+    RightEdgeDetector,
+    TopEdgeDetector,
+)
+from evergrain.core.segmentation.sampler import ImageSampler
 
 
 class PhotoDeskewer:
@@ -34,7 +34,7 @@ class PhotoDeskewer:
 
     def correct_skew(self) -> DeskewResult:
         margin_angle_pairs = [self._analyze_edge(d) for d in self.edge_detectors]
-        margins, angles = zip(*margin_angle_pairs)
+        margins, angles = zip(*margin_angle_pairs, strict=True)
 
         rotation_angle = degrees(np.median(angles))
         rotated_image = self.image.rotate(rotation_angle, Resampling.BICUBIC)
@@ -49,7 +49,7 @@ class PhotoDeskewer:
         cropped = rotated_image.crop(adjusted_margins)
         return DeskewResult(cropped, adjusted_margins, rotation_angle)
 
-    def _analyze_edge(self, detector) -> Tuple[int, float]:
+    def _analyze_edge(self, detector: EdgeDetector) -> tuple[int, float]:
         distances = []
         angles = []
 
