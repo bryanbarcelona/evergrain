@@ -94,5 +94,5 @@ class ImageSampler:
         return self._get_pixel(x + distance, y)
 
     def _get_pixel(self, x: int, y: int) -> PixelData:
-        r, g, b = self._pixel_data[x, y][:3]  # type: ignore[index]
+        r, g, b = self._pixel_data[x, y][:3]  # ty: ignore[not-subscriptable]
         return PixelData(x, y, r, g, b)

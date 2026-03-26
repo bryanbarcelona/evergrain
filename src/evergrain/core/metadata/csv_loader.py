@@ -1,25 +1,25 @@
 import csv
 from pathlib import Path
-from typing import List, Optional
 
 from evergrain.core.models.metadata import MetadataRow
-from evergrain.utils.validators import _is_valid_date
+from evergrain.utils.validators import is_valid_date
 
 
-def load_metadata_csv(csv_path: Path) -> List[MetadataRow]:
+def load_metadata_csv(csv_path: Path) -> list[MetadataRow]:
     """Load metadata from CSV file into a list of MetadataRow objects."""
     if not csv_path.exists():
         raise FileNotFoundError(f'CSV file not found: {csv_path}')
 
-    rows: List[MetadataRow] = []
-    with open(csv_path, newline='', encoding='utf-8') as f:
-        sample = f.read(2048)
+    rows: list[MetadataRow] = []
+    with Path(csv_path).open(newline='', encoding='utf-8') as f:
+        sample = f.read(8192)
         f.seek(0)
         try:
-            dialect = csv.Sniffer().sniff(sample, delimiters=[',', ';'])
+            dialect = csv.Sniffer().sniff(sample, delimiters=',;')
             delimiter = dialect.delimiter
+            print(f'Detected delimiter: {delimiter!r}')
         except csv.Error:
-            delimiter = ','
+            delimiter = ';' if sample.count(';') > sample.count(',') else ','
         reader = csv.DictReader(f, delimiter=delimiter)
         for rn, raw in enumerate(reader, start=2):
             # Parse and clamp time components
@@ -31,7 +31,7 @@ def load_metadata_csv(csv_path: Path) -> List[MetadataRow]:
             second = _clamp_time_component(_to_int_or_none(raw.get('SS', '')), 0, 59)
 
             # Validate day against month/year; invalidate if impossible
-            if not _is_valid_date(year, month, day):
+            if not is_valid_date(year, month, day):
                 day = None
 
             rows.append(
@@ -54,12 +54,7 @@ def load_metadata_csv(csv_path: Path) -> List[MetadataRow]:
     return rows
 
 
-# ----------------------------
-# Private Helper Functions
-# ----------------------------
-
-
-def _to_int_or_none(value: str) -> Optional[int]:
+def _to_int_or_none(value: str) -> int | None:
     """Convert string to int or return None if empty/invalid."""
     stripped = value.strip()
     if not stripped:
@@ -70,7 +65,7 @@ def _to_int_or_none(value: str) -> Optional[int]:
         return None
 
 
-def _clamp_time_component(value: Optional[int], min_val: int, max_val: int) -> Optional[int]:
+def _clamp_time_component(value: int | None, min_val: int, max_val: int) -> int | None:
     """Clamp time component to valid range if not None."""
     if value is None:
         return None

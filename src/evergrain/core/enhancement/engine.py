@@ -59,5 +59,5 @@ class EnhancementEngine:
             io.overwrite_image(enhanced, in_path)
             logger.debug('Enhanced image saved in-place: %s', in_path)
         else:
-            io.save_image(enhanced, out_path, format=file_format)
+            io.save_image(enhanced, out_path, file_format=file_format)
             logger.debug('Enhanced image saved to: %s', out_path)

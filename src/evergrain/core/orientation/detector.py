@@ -74,7 +74,7 @@ def _run_dnn_detection(
         scalefactor=scalefactor,
         size=(300, 300),
         mean=mean,
-    )  # type: ignore[call-overload]
+    )  # ty: ignore[no-matching-overload]
 
     net.setInput(blob)
     detections = net.forward()

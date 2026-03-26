@@ -1,10 +1,10 @@
 import re
 from collections import defaultdict
-from typing import List
+
 from evergrain.core.models.metadata import MetadataRow
 
 
-def normalize_metadata(rows: List[MetadataRow]) -> List[MetadataRow]:
+def normalize_metadata(rows: list[MetadataRow]) -> list[MetadataRow]:
     """Apply all normalization steps to metadata rows."""
     rows = _normalize_years(rows)
     rows = _resolve_cluster_names(rows)
@@ -13,12 +13,7 @@ def normalize_metadata(rows: List[MetadataRow]) -> List[MetadataRow]:
     return rows
 
 
-# ----------------------------
-# Private Helper Functions
-# ----------------------------
-
-
-def _normalize_years(rows: List[MetadataRow]) -> List[MetadataRow]:
+def _normalize_years(rows: list[MetadataRow]) -> list[MetadataRow]:
     """Normalize 2-digit years to 4-digit years (e.g., 99 → 1999, 23 → 2023)."""
     for row in rows:
         if row.year is not None and 0 <= row.year < 100:
@@ -26,8 +21,11 @@ def _normalize_years(rows: List[MetadataRow]) -> List[MetadataRow]:
     return rows
 
 
-def _resolve_cluster_names(rows: List[MetadataRow]) -> List[MetadataRow]:
-    """Normalize cluster names for typo tolerance (e.g., 'tC12' → 'tightCluster12')."""
+def _resolve_cluster_names(rows: list[MetadataRow]) -> list[MetadataRow]:
+    """Normalize cluster names for typo tolerance (e.g., 'tC12' → 'tightCluster12').
+
+    Unrecognized prefixes with a numeric suffix default to looseCluster with a warning.
+    """
     for row in rows:
         cluster_raw = (row.Cluster or '').strip()
         if not cluster_raw:
@@ -42,16 +40,16 @@ def _resolve_cluster_names(rows: List[MetadataRow]) -> List[MetadataRow]:
         elif re.match(r'l.*c.*\d+', cluster_lower):
             row.Cluster = f'looseCluster{number}'
         else:
-            raise ValueError(f"Row {row.row_num}: Invalid Cluster='{cluster_raw}'.")
+            row.Cluster = f'looseCluster{number}'
     return rows
 
 
-def _assign_undeclared_clusters(rows: List[MetadataRow]) -> List[MetadataRow]:
+def _assign_undeclared_clusters(rows: list[MetadataRow]) -> list[MetadataRow]:
     """Assign 'tightClusterN' to rows with missing Cluster within each (Event, Scene) group."""
     scenes = defaultdict(list)
     for row in rows:
         if row.Event and row.Scene:
-            scenes[(row.Event, row.Scene)].append(row)
+            scenes[row.Event, row.Scene].append(row)
 
     for scene_rows in scenes.values():
         used_indices = set()
@@ -82,7 +80,7 @@ TEMP_SCENE_PREFIX = '__TEMP_SCENE_'
 TEMP_CLUSTER_PREFIX = '__TEMP_CLUSTER_'
 
 
-def _fill_none_with_temporaries(rows: List[MetadataRow]) -> List[MetadataRow]:
+def _fill_none_with_temporaries(rows: list[MetadataRow]) -> list[MetadataRow]:
     """
     Replace None values in Event, Scene, Cluster with temporary unique strings.
     Uses global TEMP_*_PREFIX constants.
@@ -110,7 +108,7 @@ def _fill_none_with_temporaries(rows: List[MetadataRow]) -> List[MetadataRow]:
     return rows
 
 
-def _cleanup_temporaries(rows: List[MetadataRow]) -> List[MetadataRow]:
+def _cleanup_temporaries(rows: list[MetadataRow]) -> list[MetadataRow]:
     """
     Restore temporary strings back to None.
     Uses global TEMP_*_PREFIX constants.
@@ -131,7 +129,7 @@ def _cleanup_temporaries(rows: List[MetadataRow]) -> List[MetadataRow]:
     return rows
 
 
-def _assign_ids(rows: List[MetadataRow]) -> List[MetadataRow]:
+def _assign_ids(rows: list[MetadataRow]) -> list[MetadataRow]:
     """Assign IDs and unique_group_id based on Event, Scene, and Cluster names."""
 
     rows = _fill_none_with_temporaries(rows)

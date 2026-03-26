@@ -20,11 +20,11 @@ def load_image(path: Path | str) -> Image.Image:
     return rgb
 
 
-def save_image(image: Image.Image, path: Path | str, *, format: str | None = None) -> None:
+def save_image(image: Image.Image, path: Path | str, *, file_format: str | None = None) -> None:
     path = Path(path)
-    if format is None:
-        format = _guess_format(path)
-    image.save(path, format=format, quality=100)
+    if file_format is None:
+        file_format = _guess_format(path)
+    image.save(path, format=file_format, quality=100)
 
 
 def overwrite_image(image: Image.Image, target: Path | str) -> None:
@@ -33,11 +33,12 @@ def overwrite_image(image: Image.Image, target: Path | str) -> None:
 
 
 def _guess_format(path: Path) -> Literal['JPEG', 'PNG', 'TIFF']:
-    suffix = path.suffix.lower().lstrip('.')  # <-- Key change: strip the leading dot
-    return {
+    suffix = path.suffix.lower().lstrip('.')
+    formats: dict[str, Literal['JPEG', 'PNG', 'TIFF']] = {
         'jpg': 'JPEG',
         'jpeg': 'JPEG',
         'png': 'PNG',
         'tif': 'TIFF',
         'tiff': 'TIFF',
-    }.get(suffix, 'PNG')
+    }
+    return formats.get(suffix, 'PNG')

@@ -1,7 +1,7 @@
 import os
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 
 def atomic_replace(target: Path, saver: Callable[[Path], None]) -> None:
@@ -23,7 +23,7 @@ def atomic_replace(target: Path, saver: Callable[[Path], None]) -> None:
     os.close(fd)
     try:
         saver(Path(tmp_path))
-        os.replace(tmp_path, target)
+        Path(tmp_path).replace(target)
     except Exception:
         Path(tmp_path).unlink(missing_ok=True)
         raise

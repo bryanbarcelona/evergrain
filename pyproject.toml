@@ -3,6 +3,9 @@ name = "evergrain"
 version = "0.6.0"
 description = "Intelligent photo scanning and organization with automated cropping, enhancement, metadata embedding, and file renaming."
 readme = "README.md"
+authors = [
+    { name = "Bryan Barcelona", email = "131413239+bryanbarcelona@users.noreply.github.com" }
+]
 requires-python = ">=3.12"
 dependencies = [
     "numpy>=2.4.0",
@@ -13,35 +16,42 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "taskipy>=1.14.1",
+    "pytest>=9.0.2",
 ]
 
-[tool.taskipy.tasks]
-lint = "uvx ruff check . --fix"
-format = "uvx ruff format ."
-type = "uvx ty check ."
-test = "uv run pytest"
-# run audit, then wipe its cache folder
-audit   = "uv run pip-audit --skip-editable && rmdir /s /q \"%LOCALAPPDATA%\\pip-audit\" >nul 2>&1" # THIS IS IMPORTANT BECAUSE PIP-AUDIT THINKS IT'S TOTALLY FINE TO LEAVE JUNK BEHIND
-#audit   = "uvx pip-audit"
-#license = "uvx licensecheck --zero"
+[tool.pytest]
+testpaths = ["tests"]
+addopts = ["-v", "--tb=short"]
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]
 build-backend = "uv_build"
 
+[tool.ty.src]
+include = ["src/", "tests/"]
+exclude = [".venv/"]
+
+[tool.ty.rules]
+invalid-return-type = "error"
+
 [tool.ruff]
 preview = true
 line-length = 120
 target-version = "py312"
-exclude = ["tests"]
+extend-exclude = ["tests", "legacy", "main.py"]
+fix = true
 
-[tool.ruff.lint]
-select = [
-  "ANN201", "ANN001", "F401"
+lint.select = [
+  "E", "W", "F", "I", "UP", "B", "C4", "S", "BLE", "FBT",
+  "A", "C90", "T10", "ISC", "ICN", "G", "PIE", "T20",
+  "PT", "Q", "RUF", "SIM", "TID", "ARG", "PTH", "ERA",
+  "PL", "TRY", "ANN",  #  keep ANN, drop TCH/PYI
 ]
-ignore = [
-    "ANN001"
+lint.ignore = [
+  "E501", "ISC001", "COM812", "S101",
+  "PLR0913", "PLR2004", "TRY003", "ANN401",
+  "Q000", "Q003", "T201", "RUF003", "FBT001",
+  "RUF067", "PLW0603", "ANN204",
 ]
 
 #[tool.ruff.lint.per-file-ignores]
@@ -58,10 +68,14 @@ force-wrap-aliases = true
 quote-style = "single"
 docstring-code-format = true
 
+[tool.pip-audit]
+exclude = ["brybox"]
+
 [tool.commitizen]
 version_provider = "uv"
 tag_format = "v${version}"
 major_version_zero = true
+bump_message = "chore(release): $current_version → $new_version"
 
 [[tool.uv.index]]
 name = "pypi"

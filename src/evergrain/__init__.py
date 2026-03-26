@@ -15,13 +15,13 @@ from evergrain.exceptions.base import EverGrainError
 from evergrain.exceptions.discovery import DiscoveryError
 
 __all__ = [
-    'Metadata',
-    'ScanBackground',
-    'PhotoSplitter',
     'Discovery',
     'DiscoveryError',
-    'EverGrainError',
     'EnhancementEngine',
     'EnhancementParams',
+    'EverGrainError',
+    'Metadata',
     'OrientationEngine',
+    'PhotoSplitter',
+    'ScanBackground',
 ]

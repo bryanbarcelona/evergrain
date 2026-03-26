@@ -29,6 +29,7 @@ legacy/
 !images/evergrain_logo.png
 
 # Locals only
+main.py
 tester.py
 notes.txt
 /.helpers
