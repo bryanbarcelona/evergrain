@@ -36,6 +36,9 @@ wheels/
 # Legacy folder
 legacy/
 
+# Local Github Actions Runner
+.actrc
+
 # image files
 /images/*.png
 /images/*.psd
