@@ -36,20 +36,19 @@ jobs:
       - name: Cache uv
         uses: actions/cache@v4
         with:
-          key: uv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
+          key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
           restore-keys: |
-            uv-${{ runner.os }}-py${{ matrix.python-version }}-
             uv-${{ runner.os }}-
           path: ~/.cache/uv
 
       - name: Install dependencies
         run: uv sync --all-extras --dev --frozen
 
-      # - name: Lint & format
-      #   run: uvx ruff check . && uvx ruff format . --check
+      - name: Lint & format
+        run: uvx ruff check . && uvx ruff format . --check
 
-      # - name: Type check
-      #   run: uvx ty check .
+      - name: Type check
+        run: uvx ty check .
 
       - name: Check for tests
         id: check_tests
@@ -62,7 +61,7 @@ jobs:
 
       - name: Test + coverage
         if: steps.check_tests.outputs.has_tests == 'true'
-        run: uv run pytest --cov=himmel --cov-report=xml
+        run: uv run pytest --cov=evergrain --cov-report=xml   # ← change package name when reusing
 
       - name: Upload coverage
         if: steps.check_tests.outputs.has_tests == 'true'

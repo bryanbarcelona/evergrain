@@ -1,10 +1,22 @@
+# OS-specific files
+.DS_Store
+Thumbs.db
+
 # Ignore virtual environment
 .venv/
+
+# .env files
+.env
+.python-version
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# dev tools
+.pytest_cache
+.ruff_cache
 
 # VS Code settings
 .vscode/
@@ -12,6 +24,7 @@ __pycache__/
 # Distribution / packaging
 build/
 dist/
+wheels/
 *.egg-info/
 
 # Jupyter Notebook checkpoints
