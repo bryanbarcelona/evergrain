@@ -1,6 +1,6 @@
 [project]
 name = "evergrain"
-version = "0.6.0"
+version = "0.7.0"
 description = "Intelligent photo scanning and organization with automated cropping, enhancement, metadata embedding, and file renaming."
 readme = "README.md"
 authors = [

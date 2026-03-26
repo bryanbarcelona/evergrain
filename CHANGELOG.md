@@ -1,3 +1,15 @@
+## v0.7.0 (2026-03-26)
+
+### Feat
+
+- **core**: add automated image-orientation correction submodule
+
+### Refactor
+
+- fix ruff lint and ty type checking violations across core modules
+- **enhancements**: relocate IO utilities to utils directory
+- **exceptions**: move exceptions from core/exceptions to package exceptions folder
+
 ## v0.6.0 (2026-01-08)
 
 ### Feat
